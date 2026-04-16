@@ -1,30 +1,35 @@
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// ✅ GET calendars
-export async function GET(request) {
+// GET all calendars
+export async function GET() {
   try {
     const [rows] = await db.execute(
       "SELECT * FROM calendar ORDER BY id DESC"
     );
 
-    return Response.json(rows);
+    return NextResponse.json(rows, { status: 200 });
   } catch (error) {
-    console.error("GET ERROR:", error);
+    console.error("GET /api/calendar error:", error);
 
-    return Response.json(
-      { success: false, error: error.message },
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to fetch calendars",
+      },
       { status: 500 }
     );
   }
 }
 
-// ✅ POST calendar
+// POST add calendar
 export async function POST(req) {
   try {
-    const { title } = await req.json();
+    const body = await req.json();
+    const title = body.title?.trim();
 
     if (!title) {
-      return Response.json(
+      return NextResponse.json(
         { success: false, error: "Title required" },
         { status: 400 }
       );
@@ -35,12 +40,50 @@ export async function POST(req) {
       [title]
     );
 
-    return Response.json({ success: true });
+    return NextResponse.json(
+      { success: true, message: "Calendar added successfully" },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("POST ERROR:", error);
+    console.error("POST /api/calendar error:", error);
 
-    return Response.json(
-      { success: false, error: error.message },
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to add calendar",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE remove calendar
+export async function DELETE(req) {
+  try {
+    const body = await req.json();
+    const id = body.id;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "ID required" },
+        { status: 400 }
+      );
+    }
+
+    await db.execute("DELETE FROM calendar WHERE id = ?", [id]);
+
+    return NextResponse.json(
+      { success: true, message: "Calendar removed successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE /api/calendar error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to remove calendar",
+      },
       { status: 500 }
     );
   }

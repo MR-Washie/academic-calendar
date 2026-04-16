@@ -20,7 +20,7 @@ export default function CalendarPage() {
     fetch("/api/calendar")
       .then((res) => res.json())
       .then(setCalendars)
-      .catch(() => setMsg("Error loading calendars"));
+      .catch(() => setMsg("Error loading calendar"));
   }, []);
 
   // ✅ FETCH EVENTS
