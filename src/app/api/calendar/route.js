@@ -57,6 +57,35 @@ export async function POST(req) {
   }
 }
 
+//PUT edit calendar 
+export async function PUT(req) {
+  try {
+    const { id, title } = await req.json();
+
+    if(!id || !title) {
+      return NextResponse.json(
+        {success: false, error: "ID & title required" },
+        {status: 400}
+      );
+    }
+    await db.execute("UPDATE calendar set title = ? where id = ?", [title, id]);
+
+    return NextResponse.json(
+      { success: true, message: "Calendar update succefully"},
+      {status: 200}
+    );
+  } catch (error) {
+    console.log("Error in edit calendar /api/calendar : ", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to edit calendar",
+      },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE remove calendar
 export async function DELETE(req) {
   try {
